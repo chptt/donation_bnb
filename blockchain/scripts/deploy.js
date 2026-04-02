@@ -39,16 +39,15 @@ async function main() {
     JSON.stringify(deploymentInfo, null, 2)
   );
 
-  // Copy ABI to frontend and backend
+  // Copy ABI to frontend
   const artifactPath = path.join(
     __dirname,
     "../artifacts/contracts/ChainGive.sol/ChainGive.json"
   );
 
-  const frontendAbiDir = path.join(__dirname, "../../frontend/src/lib/contracts");
-  const backendAbiDir = path.join(__dirname, "../../backend/src/config");
+  const frontendAbiDir = path.join(__dirname, "../../frontend/lib/contracts");
 
-  [frontendAbiDir, backendAbiDir].forEach((dir) => {
+  [frontendAbiDir].forEach((dir) => {
     if (!fs.existsSync(dir)) {
       fs.mkdirSync(dir, { recursive: true });
     }
@@ -57,7 +56,6 @@ async function main() {
   if (fs.existsSync(artifactPath)) {
     const artifact = JSON.parse(fs.readFileSync(artifactPath, "utf8"));
 
-    // Write ABI + address for frontend
     const frontendConfig = {
       address: contractAddress,
       abi: artifact.abi,
@@ -69,13 +67,7 @@ async function main() {
       JSON.stringify(frontendConfig, null, 2)
     );
 
-    // Write ABI + address for backend
-    fs.writeFileSync(
-      path.join(backendAbiDir, "ChainGive.json"),
-      JSON.stringify(frontendConfig, null, 2)
-    );
-
-    console.log("📄 ABI copied to frontend and backend");
+    console.log("📄 ABI copied to frontend");
   }
 
   console.log("\n📋 Deployment Summary:");
