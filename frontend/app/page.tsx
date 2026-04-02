@@ -12,7 +12,7 @@ const features = [
 const steps = [
   { step: "01", title: "Connect Wallet", desc: "Link your MetaMask wallet to BNB Testnet" },
   { step: "02", title: "Browse Campaigns", desc: "Explore active campaigns across categories" },
-  { step: "03", title: "Donate Securely", desc: "Send BNB directly via smart contract" },
+  { step: "03", title: "Support Creators", desc: "Send BNB directly to your favorite creators" },
   { step: "04", title: "Track Impact", desc: "See your donations on the leaderboard" },
 ];
 
@@ -30,19 +30,19 @@ export default function HomePage() {
         <div className="mx-auto max-w-4xl text-center">
           <div className="inline-flex items-center gap-2 rounded-full border border-yellow-400/30 bg-yellow-400/10 px-4 py-1.5 text-sm text-yellow-400 mb-8">
             <Zap className="h-3.5 w-3.5" />
-            Powered by BNB Smart Chain Testnet
+            Powered by opBNB Testnet
           </div>
 
           <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight text-white mb-6">
-            Fund What{" "}
+            Fans Support{" "}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-orange-400">
-              Matters
+              Creators
             </span>
             <br />on the Blockchain
           </h1>
 
           <p className="text-xl text-gray-400 max-w-2xl mx-auto mb-10">
-            ChainGive connects creators with supporters through transparent, on-chain donations.
+            ChainGive lets fans donate directly to their favorite creators on-chain.
             Every transaction is verifiable. Every campaign is real.
           </p>
 
@@ -124,7 +124,7 @@ export default function HomePage() {
       <section className="px-4 py-20 border-t border-gray-800/50">
         <div className="mx-auto max-w-2xl text-center">
           <h2 className="text-3xl font-bold text-white mb-4">Ready to make an impact?</h2>
-          <p className="text-gray-400 mb-8">Join thousands of creators and donors on ChainGive</p>
+          <p className="text-gray-400 mb-8">Join creators and fans on ChainGive</p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link href="/register?role=creator">
               <Button size="lg">Launch a Campaign</Button>
