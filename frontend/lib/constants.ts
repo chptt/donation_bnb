@@ -1,23 +1,20 @@
 export const CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS || "";
 
-export const API_URL =
-  process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+export const OPBNB_TESTNET_RPC =
+  process.env.NEXT_PUBLIC_OPBNB_TESTNET_RPC ||
+  "https://opbnb-testnet-rpc.bnbchain.org";
 
-export const BSC_TESTNET_RPC =
-  process.env.NEXT_PUBLIC_BSC_TESTNET_RPC ||
-  "https://data-seed-prebsc-1-s1.binance.org:8545/";
+// Alias used by contract.ts
+export const BSC_TESTNET_RPC = OPBNB_TESTNET_RPC;
 
 export const BSC_TESTNET = {
-  chainId: "0x61",
-  chainIdDecimal: 97,
-  chainName: "BNB Smart Chain Testnet",
-  nativeCurrency: { name: "BNB", symbol: "BNB", decimals: 18 },
-  rpcUrls: [
-    process.env.NEXT_PUBLIC_BSC_TESTNET_RPC ||
-      "https://data-seed-prebsc-1-s1.binance.org:8545/",
-  ],
+  chainId: "0x15EB",        // 5611 decimal
+  chainIdDecimal: 5611,
+  chainName: "opBNB Testnet",
+  nativeCurrency: { name: "tBNB", symbol: "tBNB", decimals: 18 },
+  rpcUrls: [OPBNB_TESTNET_RPC],
   blockExplorerUrls: [
-    process.env.NEXT_PUBLIC_BLOCK_EXPLORER || "https://testnet.bscscan.com",
+    process.env.NEXT_PUBLIC_BLOCK_EXPLORER || "https://testnet.opbnbscan.com",
   ],
 };
 

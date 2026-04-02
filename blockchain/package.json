@@ -6,6 +6,7 @@
     "compile": "hardhat compile",
     "test": "hardhat test",
     "deploy:testnet": "hardhat run scripts/deploy.js --network bscTestnet",
+    "deploy:opbnb": "hardhat run scripts/deploy.js --network opBNBTestnet",
     "deploy:local": "hardhat run scripts/deploy.js --network localhost",
     "node": "hardhat node"
   },
