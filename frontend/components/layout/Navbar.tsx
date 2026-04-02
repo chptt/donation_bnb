@@ -6,7 +6,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useWallet } from "@/context/WalletContext";
 import { Button } from "@/components/ui/Button";
 import { shortenAddress } from "@/lib/utils";
-import { Zap, Menu, X, ChevronDown, LogOut, User, LayoutDashboard, Trophy } from "lucide-react";
+import { Zap, Menu, X, ChevronDown, User, LayoutDashboard } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const navLinks = [
@@ -88,7 +88,7 @@ export default function Navbar() {
               </Button>
             )}
 
-            {/* Auth */}
+            {/* No login/signup — wallet connect is the only auth */}
             {user ? (
               <div className="relative">
                 <button
@@ -109,19 +109,10 @@ export default function Navbar() {
                     <Link href="/profile" className="flex items-center gap-2 px-4 py-2 text-sm text-gray-300 hover:bg-gray-800 hover:text-white" onClick={() => setProfileOpen(false)}>
                       <User className="h-4 w-4" /> Profile
                     </Link>
-                    <hr className="my-1 border-gray-800" />
-                    <button onClick={() => { logout(); setProfileOpen(false); }} className="flex w-full items-center gap-2 px-4 py-2 text-sm text-red-400 hover:bg-gray-800">
-                      <LogOut className="h-4 w-4" /> Logout
-                    </button>
                   </div>
                 )}
               </div>
-            ) : (
-              <div className="flex items-center gap-2">
-                <Link href="/login"><Button size="sm" variant="ghost">Login</Button></Link>
-                <Link href="/register"><Button size="sm">Sign Up</Button></Link>
-              </div>
-            )}
+            ) : null}
           </div>
 
           {/* Mobile menu toggle */}
@@ -159,14 +150,8 @@ export default function Navbar() {
               <>
                 <Link href="/dashboard" className="block px-3 py-2 rounded-lg text-sm text-gray-300 hover:bg-gray-800" onClick={() => setMobileOpen(false)}>Dashboard</Link>
                 <Link href="/profile" className="block px-3 py-2 rounded-lg text-sm text-gray-300 hover:bg-gray-800" onClick={() => setMobileOpen(false)}>Profile</Link>
-                <button onClick={() => { logout(); setMobileOpen(false); }} className="block w-full text-left px-3 py-2 rounded-lg text-sm text-red-400 hover:bg-gray-800">Logout</button>
               </>
-            ) : (
-              <div className="flex gap-2">
-                <Link href="/login" className="flex-1"><Button size="sm" variant="outline" className="w-full">Login</Button></Link>
-                <Link href="/register" className="flex-1"><Button size="sm" className="w-full">Sign Up</Button></Link>
-              </div>
-            )}
+            ) : null}
           </div>
         </div>
       )}

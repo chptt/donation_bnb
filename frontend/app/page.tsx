@@ -126,7 +126,7 @@ export default function HomePage() {
           <h2 className="text-3xl font-bold text-white mb-4">Ready to make an impact?</h2>
           <p className="text-gray-400 mb-8">Join creators and fans on ChainGive</p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Link href="/register?role=creator">
+            <Link href="/campaigns/create">
               <Button size="lg">Launch a Campaign</Button>
             </Link>
             <Link href="/explore">
