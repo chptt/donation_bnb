@@ -1,4 +1,5 @@
 "use client";
+export const dynamic = "force-dynamic";
 import { useState, useEffect, useMemo } from "react";
 import { getAllCampaigns, getCampaignDonations } from "@/lib/contract";
 import { Campaign, LeaderboardCampaign, LeaderboardDonor } from "@/types";
@@ -85,7 +86,7 @@ export default function LeaderboardPage() {
         </div>
         <h1 className="text-4xl font-bold text-white">Leaderboard</h1>
         <p className="text-gray-400">Real-time rankings from on-chain data</p>
-        <p className="text-xs text-gray-600">Last updated: {lastUpdated.toLocaleTimeString()} · Auto-refreshes every 60s</p>
+        <p className="text-xs text-gray-600">Last updated: {lastUpdated.toLocaleTimeString()} Â· Auto-refreshes every 60s</p>
       </div>
 
       <div className="flex items-center justify-center gap-3">
@@ -161,7 +162,7 @@ export default function LeaderboardPage() {
                           </div>
                           <div className="flex-1 min-w-0">
                             <p className="font-medium text-white text-sm truncate">{c.title}</p>
-                            <p className="text-xs text-gray-500">{shortenAddress(c.creator)} · {c.category}</p>
+                            <p className="text-xs text-gray-500">{shortenAddress(c.creator)} Â· {c.category}</p>
                             <ProgressBar value={c.progressPercent} className="mt-2" />
                           </div>
                           <div className="text-right shrink-0 space-y-0.5">

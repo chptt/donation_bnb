@@ -1,11 +1,26 @@
 import { Donation } from "@/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
-import { timeAgo, formatBNB, shortenAddress, truncateTxHash } from "@/lib/utils";
-import { Activity, ExternalLink } from "lucide-react";
-import { BSC_TESTNET } from "@/lib/constants";
+import { formatBNB, shortenAddress } from "@/lib/utils";
+import { Activity } from "lucide-react";
+import { ethers } from "ethers";
+
+interface EnrichedDonation {
+  donor: string;
+  amount: bigint;
+  timestamp: number;
+  campaignTitle?: string;
+}
 
 interface Props {
-  donations: Donation[];
+  donations: EnrichedDonation[];
+}
+
+function timeAgo(ts: number): string {
+  const diff = Math.floor(Date.now() / 1000) - ts;
+  if (diff < 60) return `${diff}s ago`;
+  if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+  if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
+  return `${Math.floor(diff / 86400)}d ago`;
 }
 
 export default function RecentActivity({ donations }: Props) {
@@ -22,41 +37,27 @@ export default function RecentActivity({ donations }: Props) {
           <div className="py-8 text-center text-gray-500 text-sm">No activity yet</div>
         ) : (
           <div className="space-y-3">
-            {donations.map((d) => {
-              const campaign = typeof d.campaign === "object" ? d.campaign : null;
-              const donor = d.donor;
-              return (
-                <div key={d._id} className="flex items-start gap-3 rounded-lg p-3 hover:bg-gray-800/40 transition-colors">
-                  <div className="h-8 w-8 rounded-full bg-yellow-400/20 flex items-center justify-center text-yellow-400 text-xs font-bold shrink-0">
-                    {donor?.name?.[0]?.toUpperCase() || d.walletAddress[2].toUpperCase()}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm text-white">
-                      <span className="font-medium">{donor?.name || shortenAddress(d.walletAddress)}</span>
-                      <span className="text-gray-400"> donated </span>
-                      <span className="font-medium text-yellow-400">{formatBNB(d.amount)} BNB</span>
-                    </p>
-                    {campaign && (
-                      <p className="text-xs text-gray-500 truncate">to {campaign.title}</p>
-                    )}
-                    <div className="flex items-center gap-2 mt-1">
-                      <span className="text-xs text-gray-600">{timeAgo(d.donatedAt)}</span>
-                      <a
-                        href={`${BSC_TESTNET.blockExplorerUrls[0]}/tx/${d.txHash}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-0.5 text-xs text-gray-600 hover:text-yellow-400 transition-colors"
-                      >
-                        {truncateTxHash(d.txHash)} <ExternalLink className="h-2.5 w-2.5" />
-                      </a>
-                    </div>
-                  </div>
-                  <div className="text-right shrink-0">
-                    <span className="text-xs text-emerald-400 bg-emerald-400/10 rounded-full px-2 py-0.5">confirmed</span>
-                  </div>
+            {donations.map((d, i) => (
+              <div key={i} className="flex items-start gap-3 rounded-lg p-3 hover:bg-gray-800/40 transition-colors">
+                <div className="h-8 w-8 rounded-full bg-yellow-400/20 flex items-center justify-center text-yellow-400 text-xs font-bold shrink-0">
+                  {d.donor[2].toUpperCase()}
                 </div>
-              );
-            })}
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm text-white">
+                    <span className="font-medium">{shortenAddress(d.donor)}</span>
+                    <span className="text-gray-400"> donated </span>
+                    <span className="font-medium text-yellow-400">{formatBNB(d.amount)} BNB</span>
+                  </p>
+                  {d.campaignTitle && (
+                    <p className="text-xs text-gray-500 truncate">to {d.campaignTitle}</p>
+                  )}
+                  <span className="text-xs text-gray-600">{timeAgo(d.timestamp)}</span>
+                </div>
+                <span className="text-xs text-emerald-400 bg-emerald-400/10 rounded-full px-2 py-0.5 shrink-0">
+                  confirmed
+                </span>
+              </div>
+            ))}
           </div>
         )}
       </CardContent>

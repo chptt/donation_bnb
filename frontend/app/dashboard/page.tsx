@@ -1,18 +1,28 @@
 "use client";
+export const dynamic = "force-dynamic";
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useWallet } from "@/context/WalletContext";
 import { useAuth } from "@/context/AuthContext";
-import { getAllCampaigns, getCampaignsByCreator, getTotalDonatedBy, getDonatedCampaignIds, getCampaign } from "@/lib/contract";
+import { getAllCampaigns, getCampaignsByCreator, getTotalDonatedBy, getDonatedCampaignIds, getCampaign, getCampaignDonations } from "@/lib/contract";
 import { Campaign, DashboardSummary } from "@/types";
 import StatCard from "@/components/dashboard/StatCard";
+import DonationTrendChart from "@/components/dashboard/DonationTrendChart";
+import RecentActivity from "@/components/dashboard/RecentActivity";
+import LeaderboardTable from "@/components/leaderboard/LeaderboardTable";
 import { StatCardSkeleton } from "@/components/ui/Skeleton";
 import { Button } from "@/components/ui/Button";
 import { ProgressBar } from "@/components/ui/ProgressBar";
 import { Badge } from "@/components/ui/Badge";
 import { formatBNB, shortenAddress, daysLeft, isExpired } from "@/lib/utils";
 import { Wallet, TrendingUp, Users, LayoutGrid, Plus, AlertCircle } from "lucide-react";
-import { ethers } from "ethers";
+
+interface EnrichedDonation {
+  donor: string;
+  amount: bigint;
+  timestamp: number;
+  campaignTitle?: string;
+}
 
 export default function DashboardPage() {
   const { address, isConnected, connect } = useWallet();
@@ -22,34 +32,39 @@ export default function DashboardPage() {
   const [myCampaigns, setMyCampaigns] = useState<Campaign[]>([]);
   const [myDonatedCampaigns, setMyDonatedCampaigns] = useState<Campaign[]>([]);
   const [totalDonated, setTotalDonated] = useState<bigint>(0n);
+  const [recentDonations, setRecentDonations] = useState<EnrichedDonation[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    fetchAll();
-  }, [address]);
+  useEffect(() => { fetchAll(); }, [address]);
 
   const fetchAll = async () => {
     setLoading(true);
     try {
       const all = await getAllCampaigns();
 
-      // Platform summary
-      const totalRaised = all.reduce((s, c) => s + c.amountRaised, 0n);
-      const uniqueDonors = new Set(all.flatMap(() => [])).size; // approximate
       setSummary({
         totalCampaigns: all.length,
         activeCampaigns: all.filter((c) => c.status === "active").length,
-        totalRaised,
+        totalRaised: all.reduce((s, c) => s + c.amountRaised, 0n),
         totalDonors: all.reduce((s, c) => s + c.donorCount, 0),
       });
 
+      // Collect recent donations for chart + activity
+      const allDonations: EnrichedDonation[] = [];
+      for (const c of all.slice(0, 10)) {
+        const donations = await getCampaignDonations(c.id);
+        for (const d of donations) {
+          allDonations.push({ ...d, campaignTitle: c.title });
+        }
+      }
+      allDonations.sort((a, b) => b.timestamp - a.timestamp);
+      setRecentDonations(allDonations.slice(0, 20));
+
       if (address) {
-        // Creator campaigns
         const created = await getCampaignsByCreator(address);
         setMyCampaigns(created);
         if (created.length > 0) setRole("creator");
 
-        // Donor history
         const donated = await getTotalDonatedBy(address);
         setTotalDonated(donated);
 
@@ -66,13 +81,12 @@ export default function DashboardPage() {
 
   return (
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10 space-y-8">
-      {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div>
           <h1 className="text-2xl font-bold text-white">
-            {user ? `Welcome, ${user.name} 👋` : "Dashboard"}
+            {user ? `Welcome, ${user.name} ðŸ‘‹` : "Dashboard"}
           </h1>
-          <p className="text-gray-400 text-sm mt-1">On-chain donation platform on BNB Chain</p>
+          <p className="text-gray-400 text-sm mt-1">On-chain donation platform on opBNB</p>
         </div>
         <div className="flex items-center gap-3">
           {!isConnected ? (
@@ -96,11 +110,10 @@ export default function DashboardPage() {
       {!isConnected && (
         <div className="flex items-center gap-3 rounded-xl border border-yellow-400/20 bg-yellow-400/5 p-4">
           <AlertCircle className="h-5 w-5 text-yellow-400 shrink-0" />
-          <p className="text-sm text-yellow-300">Connect your MetaMask wallet to donate and create campaigns on BNB Chain.</p>
+          <p className="text-sm text-yellow-300">Connect your MetaMask wallet to donate and create campaigns on opBNB.</p>
         </div>
       )}
 
-      {/* Platform stats */}
       <div>
         <h2 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-4">Platform Overview</h2>
         {loading ? (
@@ -117,7 +130,6 @@ export default function DashboardPage() {
         )}
       </div>
 
-      {/* Personal stats */}
       {isConnected && !loading && (
         <div>
           <h2 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-4">Your Stats</h2>
@@ -125,17 +137,11 @@ export default function DashboardPage() {
             <StatCard title="Total Donated" value={`${formatBNB(totalDonated)} BNB`} icon={TrendingUp} iconColor="text-yellow-400" />
             <StatCard title="Campaigns Donated" value={myDonatedCampaigns.length} icon={Users} iconColor="text-emerald-400" />
             <StatCard title="Campaigns Created" value={myCampaigns.length} icon={LayoutGrid} iconColor="text-blue-400" />
-            <StatCard
-              title="Total Raised (Creator)"
-              value={`${formatBNB(myCampaigns.reduce((s, c) => s + c.amountRaised, 0n))} BNB`}
-              icon={Wallet}
-              iconColor="text-purple-400"
-            />
+            <StatCard title="Total Raised (Creator)" value={`${formatBNB(myCampaigns.reduce((s, c) => s + c.amountRaised, 0n))} BNB`} icon={Wallet} iconColor="text-purple-400" />
           </div>
         </div>
       )}
 
-      {/* My Campaigns */}
       {myCampaigns.length > 0 && (
         <div>
           <div className="flex items-center justify-between mb-4">
@@ -157,7 +163,7 @@ export default function DashboardPage() {
                   </div>
                   <div className="text-right shrink-0">
                     <p className="text-sm font-semibold text-yellow-400">{formatBNB(c.amountRaised)} BNB</p>
-                    <p className="text-xs text-gray-500">{c.donorCount} donors · {isExpired(c.deadline) ? "Ended" : `${daysLeft(c.deadline)}d left`}</p>
+                    <p className="text-xs text-gray-500">{c.donorCount} donors Â· {isExpired(c.deadline) ? "Ended" : `${daysLeft(c.deadline)}d left`}</p>
                   </div>
                 </div>
               </Link>
@@ -166,7 +172,6 @@ export default function DashboardPage() {
         </div>
       )}
 
-      {/* Donated campaigns */}
       {myDonatedCampaigns.length > 0 && (
         <div>
           <h2 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-4">Campaigns I Donated To</h2>
@@ -188,6 +193,13 @@ export default function DashboardPage() {
           </div>
         </div>
       )}
+
+      <div className="grid lg:grid-cols-2 gap-6">
+        <DonationTrendChart donations={recentDonations} />
+        <RecentActivity donations={recentDonations} />
+      </div>
+
+      <LeaderboardTable />
     </div>
   );
 }

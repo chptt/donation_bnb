@@ -1,4 +1,5 @@
 "use client";
+export const dynamic = "force-dynamic";
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useWallet } from "@/context/WalletContext";
@@ -23,14 +24,13 @@ export default function LoginPage() {
           <h1 className="text-2xl font-bold text-white">Connect to ChainGive</h1>
           <p className="text-gray-400 mt-2">No account needed — your wallet is your identity</p>
         </div>
-
         <div className="rounded-2xl border border-gray-800 bg-gray-900/60 p-8 space-y-6">
           <div className="space-y-3 text-left">
             {[
               "Connect your MetaMask wallet",
               "Browse and donate to campaigns",
               "Create your own fundraising campaign",
-              "All data lives on BNB Chain + IPFS",
+              "All data lives on opBNB Chain + IPFS",
             ].map((item, i) => (
               <div key={i} className="flex items-center gap-3 text-sm text-gray-300">
                 <span className="h-5 w-5 rounded-full bg-yellow-400/20 text-yellow-400 flex items-center justify-center text-xs font-bold shrink-0">
@@ -40,13 +40,11 @@ export default function LoginPage() {
               </div>
             ))}
           </div>
-
           <Button className="w-full" size="lg" onClick={connect} loading={connecting}>
             <Wallet className="h-4 w-4" /> Connect Wallet
           </Button>
-
           <p className="text-xs text-gray-500">
-            MetaMask required. Make sure you&apos;re on BNB Smart Chain Testnet.
+            MetaMask required. Switch to opBNB Testnet (Chain ID: 5611).
           </p>
         </div>
       </div>

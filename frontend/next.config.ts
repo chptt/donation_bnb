@@ -7,6 +7,10 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "**" },
     ],
   },
+  // All pages use wallet/blockchain — skip static generation entirely
+  experimental: {
+    // force all pages to be dynamic (no prerendering)
+  },
 };
 
 export default nextConfig;

@@ -1,4 +1,5 @@
 "use client";
+export const dynamic = "force-dynamic";
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import Image from "next/image";
@@ -9,7 +10,7 @@ import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { useWallet } from "@/context/WalletContext";
-import { formatBNB, formatDate, daysLeft, isExpired, shortenAddress, timeAgo } from "@/lib/utils";
+import { formatBNB, formatDate, daysLeft, isExpired, shortenAddress } from "@/lib/utils";
 import { resolveIPFS } from "@/lib/ipfs";
 import { ethers } from "ethers";
 import { ExternalLink, Heart, Share2, Calendar } from "lucide-react";
@@ -21,9 +22,17 @@ function truncateTx(hash: string) {
   return hash ? `${hash.slice(0, 10)}...${hash.slice(-8)}` : "";
 }
 
+function timeAgo(ts: number): string {
+  const diff = Math.floor(Date.now() / 1000) - ts;
+  if (diff < 60) return `${diff}s ago`;
+  if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+  if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
+  return `${Math.floor(diff / 86400)}d ago`;
+}
+
 export default function CampaignDetailPage() {
   const { id } = useParams<{ id: string }>();
-  const { isConnected, isCorrectNetwork, connect, switchNetwork } = useWallet();
+  const { isConnected, connect } = useWallet();
 
   const [campaign, setCampaign] = useState<Campaign | null>(null);
   const [donations, setDonations] = useState<Donation[]>([]);
@@ -84,7 +93,6 @@ export default function CampaignDetailPage() {
     <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-10">
       <div className="grid lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2 space-y-6">
-          {/* Image */}
           <div className="relative h-72 sm:h-96 rounded-2xl overflow-hidden bg-gray-800">
             <Image
               src={campaign.image}
@@ -103,7 +111,6 @@ export default function CampaignDetailPage() {
             </div>
           </div>
 
-          {/* Title */}
           <div className="flex items-start justify-between gap-4">
             <h1 className="text-2xl sm:text-3xl font-bold text-white">{campaign.title}</h1>
             <button onClick={handleShare} className="shrink-0 rounded-lg border border-gray-700 p-2 text-gray-400 hover:text-white hover:bg-gray-800 transition-colors">
@@ -111,24 +118,19 @@ export default function CampaignDetailPage() {
             </button>
           </div>
 
-          {/* Creator */}
           <div className="flex items-center gap-3 p-4 rounded-xl border border-gray-800 bg-gray-900/40">
             <div className="h-10 w-10 rounded-full bg-yellow-400/20 flex items-center justify-center text-yellow-400 font-bold">
               {(campaign.creatorName || campaign.creator)[0].toUpperCase()}
             </div>
             <div>
               <p className="text-sm font-medium text-white">{campaign.creatorName || "Anonymous"}</p>
-              <a
-                href={`${BSC_TESTNET.blockExplorerUrls[0]}/address/${campaign.creator}`}
-                target="_blank" rel="noopener noreferrer"
-                className="text-xs text-gray-500 hover:text-yellow-400 flex items-center gap-1"
-              >
+              <a href={`${BSC_TESTNET.blockExplorerUrls[0]}/address/${campaign.creator}`} target="_blank" rel="noopener noreferrer"
+                className="text-xs text-gray-500 hover:text-yellow-400 flex items-center gap-1">
                 {shortenAddress(campaign.creator)} <ExternalLink className="h-3 w-3" />
               </a>
             </div>
           </div>
 
-          {/* Description */}
           <div className="space-y-4">
             <h2 className="text-lg font-semibold text-white">About this campaign</h2>
             <p className="text-gray-300 leading-relaxed">{campaign.description}</p>
@@ -139,22 +141,17 @@ export default function CampaignDetailPage() {
             )}
           </div>
 
-          {/* IPFS metadata link */}
           <div className="rounded-xl border border-gray-800 bg-gray-900/40 p-4 flex items-center justify-between">
             <div>
               <p className="text-xs text-gray-500 mb-1">Metadata stored on IPFS</p>
               <p className="text-xs text-gray-600 font-mono truncate max-w-xs">{campaign.metadataURI}</p>
             </div>
-            <a
-              href={resolveIPFS(campaign.metadataURI)}
-              target="_blank" rel="noopener noreferrer"
-              className="ml-3 shrink-0 text-xs text-yellow-400 hover:underline flex items-center gap-1"
-            >
+            <a href={resolveIPFS(campaign.metadataURI)} target="_blank" rel="noopener noreferrer"
+              className="ml-3 shrink-0 text-xs text-yellow-400 hover:underline flex items-center gap-1">
               View <ExternalLink className="h-3 w-3" />
             </a>
           </div>
 
-          {/* Donations */}
           <div>
             <h2 className="text-lg font-semibold text-white mb-4">Donations ({donations.length})</h2>
             {donations.length === 0 ? (
@@ -172,7 +169,7 @@ export default function CampaignDetailPage() {
                       </div>
                       <div>
                         <p className="text-sm text-white">{shortenAddress(d.donor)}</p>
-                        <span className="text-xs text-gray-500">{timeAgo(new Date(d.timestamp * 1000).toISOString())}</span>
+                        <span className="text-xs text-gray-500">{timeAgo(d.timestamp)}</span>
                       </div>
                     </div>
                     <span className="font-semibold text-yellow-400 text-sm">{formatBNB(d.amount)} BNB</span>
@@ -183,16 +180,13 @@ export default function CampaignDetailPage() {
           </div>
         </div>
 
-        {/* Sidebar */}
         <div className="space-y-4">
           <div className="rounded-2xl border border-gray-800 bg-gray-900/60 p-6 space-y-5 sticky top-20">
             <div>
               <p className="text-3xl font-bold text-white">{formatBNB(campaign.amountRaised)} BNB</p>
               <p className="text-sm text-gray-400 mt-1">raised of {formatBNB(campaign.targetAmount)} BNB goal</p>
             </div>
-
             <ProgressBar value={campaign.progressPercent} showLabel />
-
             <div className="grid grid-cols-3 gap-3 text-center">
               <div className="rounded-lg bg-gray-800/60 p-3">
                 <p className="text-lg font-bold text-white">{campaign.donorCount}</p>
@@ -207,12 +201,10 @@ export default function CampaignDetailPage() {
                 <p className="text-xs text-gray-500">days left</p>
               </div>
             </div>
-
             <div className="text-xs text-gray-500 flex items-center gap-1">
               <Calendar className="h-3 w-3" />
               Deadline: {formatDate(campaign.deadline)}
             </div>
-
             {canDonate ? (
               isConnected ? (
                 <Button className="w-full" size="lg" onClick={() => setShowDonate(true)}>

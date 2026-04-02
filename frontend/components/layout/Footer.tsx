@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Zap, Github, Twitter } from "lucide-react";
+import { Zap } from "lucide-react";
 
 export default function Footer() {
   return (

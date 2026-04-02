@@ -17,7 +17,18 @@ interface WalletContextType {
   switchNetwork: () => Promise<void>;
 }
 
-const WalletContext = createContext<WalletContextType | null>(null);
+const WalletContext = createContext<WalletContextType>({
+  address: null,
+  provider: null,
+  signer: null,
+  chainId: null,
+  isConnected: false,
+  isCorrectNetwork: false,
+  connecting: false,
+  connect: async () => {},
+  disconnect: () => {},
+  switchNetwork: async () => {},
+});
 
 export function WalletProvider({ children }: { children: ReactNode }) {
   const [address, setAddress] = useState<string | null>(null);
@@ -74,17 +85,18 @@ export function WalletProvider({ children }: { children: ReactNode }) {
       }
 
       // Listen for account/chain changes
-      window.ethereum.on("accountsChanged", (accounts: string[]) => {
-        if (accounts.length === 0) {
+      window.ethereum.on("accountsChanged", (accounts: unknown) => {
+        const accs = accounts as string[];
+        if (accs.length === 0) {
           setAddress(null);
           setSigner(null);
         } else {
-          setAddress(accounts[0]);
+          setAddress(accs[0]);
         }
       });
 
-      window.ethereum.on("chainChanged", (newChainId: string) => {
-        setChainId(parseInt(newChainId, 16));
+      window.ethereum.on("chainChanged", (newChainId: unknown) => {
+        setChainId(parseInt(newChainId as string, 16));
         window.location.reload();
       });
     } catch (err) {
@@ -113,7 +125,5 @@ export function WalletProvider({ children }: { children: ReactNode }) {
 }
 
 export function useWallet() {
-  const ctx = useContext(WalletContext);
-  if (!ctx) throw new Error("useWallet must be used within WalletProvider");
-  return ctx;
+  return useContext(WalletContext);
 }

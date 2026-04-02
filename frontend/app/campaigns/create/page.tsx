@@ -1,4 +1,5 @@
 "use client";
+export const dynamic = "force-dynamic";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
@@ -156,7 +157,7 @@ export default function CreateCampaignPage() {
                 isActive ? "bg-yellow-400 text-gray-900" :
                 isDone ? "bg-emerald-500 text-white" : "bg-gray-800 text-gray-500"
               )}>
-                {isDone ? "✓" : i + 1}
+                {isDone ? "âœ“" : i + 1}
               </div>
               <span className={cn("text-sm hidden sm:block", isActive ? "text-white font-medium" : "text-gray-500")}>
                 {s.label}

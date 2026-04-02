@@ -1,0 +1,8 @@
+{
+  "network": "opBNBTestnet",
+  "chainId": 5611,
+  "contractAddress": "0x970b810970BC5103Ab7159cA0829878211AC8549",
+  "deployer": "0x32EfAe774A73A4E4b835Bad888e52e291c34E9aC",
+  "deployedAt": "2026-04-02T13:01:48.607Z",
+  "platformFee": 2
+}

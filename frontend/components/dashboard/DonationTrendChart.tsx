@@ -1,18 +1,41 @@
 "use client";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
-import { TrendPoint } from "@/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { TrendingUp } from "lucide-react";
+import { ethers } from "ethers";
 
-interface Props {
-  data: TrendPoint[];
+interface DonationPoint {
+  timestamp: number;
+  amount: bigint;
 }
 
-export default function DonationTrendChart({ data }: Props) {
-  const formatted = data.map((d) => ({
-    date: d._id,
-    amount: parseFloat(d.totalAmount.toFixed(4)),
-    count: d.count,
+interface Props {
+  donations: DonationPoint[];
+}
+
+export default function DonationTrendChart({ donations }: Props) {
+  // Group by day (last 7 days)
+  const now = Date.now();
+  const days: Record<string, number> = {};
+
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(now - i * 86400000);
+    const key = d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+    days[key] = 0;
+  }
+
+  for (const d of donations) {
+    const ts = d.timestamp * 1000;
+    if (now - ts > 7 * 86400000) continue;
+    const key = new Date(ts).toLocaleDateString("en-US", { month: "short", day: "numeric" });
+    if (key in days) {
+      days[key] += parseFloat(ethers.formatEther(d.amount));
+    }
+  }
+
+  const formatted = Object.entries(days).map(([date, amount]) => ({
+    date,
+    amount: parseFloat(amount.toFixed(4)),
   }));
 
   return (
@@ -24,7 +47,7 @@ export default function DonationTrendChart({ data }: Props) {
         </div>
       </CardHeader>
       <CardContent>
-        {formatted.length === 0 ? (
+        {formatted.every((d) => d.amount === 0) ? (
           <div className="h-48 flex items-center justify-center text-gray-500 text-sm">
             No donation data yet
           </div>
@@ -43,7 +66,7 @@ export default function DonationTrendChart({ data }: Props) {
               <Tooltip
                 contentStyle={{ backgroundColor: "#111827", border: "1px solid #374151", borderRadius: "8px", color: "#fff" }}
                 labelStyle={{ color: "#9ca3af" }}
-                formatter={(value: number) => [`${value} BNB`, "Amount"]}
+                formatter={(value: unknown) => [`${value} BNB`, "Amount"]}
               />
               <Area type="monotone" dataKey="amount" stroke="#facc15" strokeWidth={2} fill="url(#colorAmount)" />
             </AreaChart>
