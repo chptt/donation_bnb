@@ -6,7 +6,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useWallet } from "@/context/WalletContext";
 import { Button } from "@/components/ui/Button";
 import { shortenAddress } from "@/lib/utils";
-import { Zap, Menu, X, ChevronDown, User, LayoutDashboard } from "lucide-react";
+import { Zap, Menu, X, ChevronDown, User, LayoutDashboard, Trophy } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const navLinks = [
